@@ -12,6 +12,20 @@ operator must check the live target, evidence freshness, scope and permissions.
 
 ## Install and use
 
+With the ecosystem manager installed:
+
+```sh
+cto-legends sync
+cto-legends sync --apply
+cto-legends install legends-jev
+cto-legends install legends-jev --apply
+cto-legends handoff legends-jev
+cto-legends run legends-jev -- doctor
+```
+
+The preview commands do not install or call TypeSafe. Use the isolated Python
+reported by manager `status` for the optional Windows DPAPI wrapper.
+
 Python 3.10+; no runtime dependencies. Install this source into an isolated
 environment, or install the reviewed wheel. Do not register a separate agent
 skill. The byte-exact central `cto-legends` skill is vendored in `skills/`.

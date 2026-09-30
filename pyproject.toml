@@ -12,6 +12,10 @@ license = "MIT"
 license-files = ["LICENSE"]
 dependencies = []
 
+[project.urls]
+Repository = "https://github.com/avalonreset/legends-jev"
+Issues = "https://github.com/avalonreset/legends-jev/issues"
+
 [project.scripts]
 legends-jev = "legends_jev.cli:main"
 

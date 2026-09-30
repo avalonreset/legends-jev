@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 candidate
+## 0.1.0 - 2026-09-30
 
 - Bounded typed action advice from supplied text evidence.
 - Deterministic eligibility/freshness guards and explicit operator fallback.

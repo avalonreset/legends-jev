@@ -1,12 +1,12 @@
-# Release candidate: `legends-jev v0.1.0`
+# Release procedure: `legends-jev`
 
-Publication is not performed by this candidate. Local installation and local
-guide discovery are supported before public release. The public manager catalog
+Local installation and local guide discovery are supported before public release.
+The public manager catalog
 requires a real public release, full commit and exact downloaded archive hash.
 `catalog-entry.candidate.json` deliberately has null pins and is NOT an active
 catalog. Do not insert placeholders in the live catalog.
 
-## Final publication sequence
+## Publication sequence
 
 1. Review source, tests, benchmark report and artifact contents. Review MIT
    licensing and the independent TypeSafe service boundary. Confirm public
@@ -22,8 +22,8 @@ catalog. Do not insert placeholders in the live catalog.
 6. Push the reviewed catalog change. Refresh existing startup indexes through
    manager sync. Verify fresh-session discovery separately from index presence.
 
-No manager code change or new skill registration is needed. The current
-supported local-guide route cannot lexically match ordinary outcome phrases;
-the local startup instruction supplies that consideration until public catalog
-admission. A fresh public-download install and remote CI remain publication-time
-checks. Do not call them passed based on local fixtures.
+No manager code change or new skill registration is needed. Before catalog
+admission, the supported local-guide route matches explicit names only; local
+startup instructions can supply ordinary-outcome consideration. Public catalog
+admission adds the outcome phrases to normal manager routing. Verify a fresh
+public-download install and remote CI on every release, not just local fixtures.
