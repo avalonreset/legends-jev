@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "legends-jev"
+version = "0.1.0"
+description = "Bounded typed decision advice over supplied application evidence"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = []
+
+[project.scripts]
+legends-jev = "legends_jev.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["legends_jev*"]
+
+[tool.setuptools.package-data]
+legends_jev = ["data/*.json", "docs/*.md"]

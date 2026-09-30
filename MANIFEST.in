@@ -1,0 +1,6 @@
+include VERSION LICENSE AGENTS.md .legends-module .legends-router-pin .gitattributes
+recursive-include docs *.md
+recursive-include skills *.md
+recursive-include scripts *.py *.ps1
+recursive-include tests *.py
+recursive-include release *.json *.md
