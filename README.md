@@ -1,12 +1,15 @@
 # `legends-jev`
 
-Typed decision advice for an operator choosing application or browser actions.
-Supply a small text observation and explicit candidate actions. Get a candidate
-ID or an operator fallback, with validated Choice, Score and Noul answers.
+Typed decision advice, general-purpose optical recognition (`ocr`), and storefront
+signage verification (`signage`) for an operator choosing application, browser,
+document, or local SEO review actions. Supply a small text observation and
+explicit candidate actions, or supply PNG/JPEG screenshots, documents, or photos
+to get validated Choice, Score, Noul, and Box answers (including original-image
+`pixel_box` coordinates).
 
-Jev is a hosted, text-only TypeSafe model. This MIT-licensed adapter is open
-source; the hosted model is not distributed here. No screenshot capture, image
-grounding, desktop connection, browser navigation or action execution is provided.
+Jev (`jev-1.14.0`) is a hosted TypeSafe System One model. This MIT-licensed adapter
+is open source; the hosted model is not distributed here. No screen capture,
+desktop connection, browser navigation or action execution is provided.
 Existing `legends-shell-kit` and `legends-chrome-kit` retain actuation. The
 operator must check the live target, evidence freshness, scope and permissions.
 
@@ -48,12 +51,41 @@ python -m legends_jev direct --input evidence.json
 python -m legends_jev decide --input evidence.json --execute --output receipt.json
 ```
 
-Use the isolated Python, not an arbitrary global Python. `decide` without
-`--execute` only previews. Doctor, sample, preview, readiness, direct and guide
-are offline. `models --execute` and `decide --execute` make one network request
-each (decision preflight can skip it). `benchmark --execute` runs at most 20
-synthetic cases sequentially and stops on the first provider/protocol failure.
-It compares an exact-match code baseline with Jev, not with timed Astra reasoning.
+For general-purpose OCR text verification, visual target localization (`box` +
+`pixel_box`), and visual state classification over 1 to 4 PNG/JPEG images:
+
+```sh
+python -m legends_jev ocr \
+  --goal "Verify invoice status and locate the Pay Now button" \
+  --image screen=invoice.png \
+  --expect-text "Invoice #1042" \
+  --expect-text "Balance Due" \
+  --locate "screen:the Pay Now button" \
+  --choice "payable=Invoice shows Balance Due and an active Pay Now button" \
+  --choice "paid=Invoice is already marked Paid" \
+  --execute
+```
+
+For Google Business Profile and Street View signage verification (used by
+`legends-geogrid` when installed):
+
+```sh
+python -m legends_jev signage \
+  --title "DeSano Pizzeria Napoletana" \
+  --suspect-term "Pizzeria Napoletana" \
+  --image streetview=streetview.jpg \
+  --image logo=logo.jpg \
+  --execute
+```
+
+Use the isolated Python, not an arbitrary global Python. `decide`, `ocr`, and
+`signage` without `--execute` only preview the request offline. Doctor, sample,
+preview, readiness, direct and guide are offline. `models --execute`,
+`decide --execute`, `ocr --execute`, and `signage --execute` make one network
+request each (decision preflight can skip it). `benchmark --execute` runs at
+most 20 synthetic cases sequentially and stops on the first provider/protocol
+failure. It compares an exact-match code baseline with Jev, not with timed Astra
+reasoning.
 
 ## Credentials and data
 
@@ -64,35 +96,44 @@ existing user's DPAPI pilot credential only for `--execute`; it restores the
 previous environment and clears unmanaged plaintext memory afterward. No
 credential is copied or rotated. Other machines must provision their own env.
 
-Only reviewed synthetic, public or nonsecret app metadata is in scope. Explicit
-fields exclude binaries, image payload fields, arbitrary commands and provider
-URLs. Free text is not a secret detector: redact before submitting. The module
+Only reviewed synthetic, public or nonsecret app metadata is in scope. Free text
+and screenshots are not secret detectors: redact before submitting. The module
 does not discover, capture, scrape or upload local application content itself.
-Receipts omit input text and store a hash plus validated answers. Preview prints
-the actual proposed text request for operator review. Never publish unreviewed
-previews or receipts. Account retention/ZDR entitlement is not established.
+Receipts omit input text and image bytes and store a hash plus validated answers.
+Preview prints the proposed structure (with image byte sizes instead of raw base64)
+for operator review. Never publish unreviewed previews or receipts. Account
+retention/ZDR entitlement is not established.
 
-## Routing and limits
+## Routing, OCR fortification, and limits
 
-Routinely consider this helper when computer use, application control or browser
-work contains a repeated semantic choice over short supplied evidence. Prefer
-ordinary code for exact matches. Prefer the reasoning operator when a one-off
-choice already has enough context, or the evidence is ambiguous. Consideration
-does not mean every click needs a network call.
+Routinely consider this helper when computer use, application control, browser
+work, document checks, or local SEO audits need a fast (~150-250ms) structured
+choice, optical text check, or bounding-box coordinate lookup over short supplied
+evidence or 1 to 4 images. Prefer ordinary code for exact string matches. Prefer
+the reasoning operator when a one-off choice already has enough context, or the
+evidence is ambiguous. Consideration does not mean every click needs a network call.
 
-Input is bounded to 16KB, eight candidates and 6,000 evidence characters.
+Text input is bounded to 16KB, eight candidates and 6,000 evidence characters.
 Observations older than 120 seconds, over five seconds in the future, empty
 evidence and no eligible candidates return fallback without a call. Disabled,
 unauthorized and wrong-surface candidates are excluded. Flags are operator
-assertions, not independently verified permissions. Inputs inside evidence are
-untrusted; prompt instructions are not a security proof.
+assertions, not independently verified permissions. Inputs inside evidence and
+images are untrusted; prompt instructions are not a security proof.
 
-Model `jev-1.13.0` is pinned and verified in every response. One 30-second
+Model `jev-1.14.0` is pinned and verified in every response. One 30-second
 timeout, no redirects, no automatic retries, no alias fallback and no plan
-changes. Malformed responses, unavailable credentials, network errors, unknowns
-and conservative uncertainty gates return operator fallback. Thresholds are
-pilot review triggers, not calibrated safety guarantees. No result authorizes
-an action. See [operator recipe](legends_jev/docs/recipe.md),
+changes. For optical workflows (`ocr`, `signage`, and `decide` with `evidence.images`),
+TypeSafe requires still PNG/JPEG images within `280..1568` pixels per side.
+`load_image_entry` and `prepare_image_bytes` automatically normalize out-of-range
+screenshots (such as `1920x1080` desktops or small crops) into `280..1568` px
+(unless `--no-normalize` is passed), send `assets` with header
+`TypeSafe-Danger-Zone-Images: true`, validate `box` (`top`, `bottom`, `left`,
+`right`), `noul`, `score`, and `choice` fields, and map normalized `0..1` boxes
+back to exact original-image pixel coordinates (`pixel_box` with `left`, `top`,
+`right`, `bottom`, `center_x`, `center_y`). Malformed responses, unavailable
+credentials, network errors, unknowns and conservative uncertainty gates return
+operator fallback. Thresholds are pilot review triggers, not calibrated safety
+guarantees. No result authorizes an action. See [operator recipe](legends_jev/docs/recipe.md),
 [upstream findings](docs/UPSTREAM.md), and [release plan](release/RELEASE.md).
 
 ## Development
