@@ -13,9 +13,13 @@ desktop connection, browser navigation or action execution is provided.
 Existing `legends-shell-kit` and `legends-chrome-kit` retain actuation. The
 operator must check the live target, evidence freshness, scope and permissions.
 
+## Agent setup (via `cto-legends`)
+
+Part of the [`cto-legends`](https://github.com/avalonreset/cto-legends) ecosystem. Install `cto-legends` once to give your coding agent on-demand discovery, installation, and execution routing across all 17 Legends modules. `cto-legends` is the only registered skill; this repo vendors a byte-exact copy at `skills/cto-legends/SKILL.md`.
+
 ## Install and use
 
-With the ecosystem manager installed:
+With [`cto-legends`](https://github.com/avalonreset/cto-legends) installed:
 
 ```sh
 cto-legends sync
@@ -67,7 +71,7 @@ python -m legends_jev ocr \
 ```
 
 For Google Business Profile and Street View signage verification (used by
-`legends-geogrid` when installed):
+[`legends-geogrid`](https://github.com/avalonreset/legends-geogrid) when installed):
 
 ```sh
 python -m legends_jev signage \
