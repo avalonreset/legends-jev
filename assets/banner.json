@@ -1,0 +1,36 @@
+{
+  "template": "legends-type-v1",
+  "title": "legends-jev",
+  "subtitle_lines": [
+    "optical character recognition, signage checks,",
+    "and typed computer-use decision advice"
+  ],
+  "size": [
+    4096,
+    1024
+  ],
+  "text_bounds": [
+    [
+      192,
+      212,
+      1391,
+      386
+    ],
+    [
+      192,
+      534,
+      3136,
+      636
+    ],
+    [
+      192,
+      666,
+      2624,
+      768
+    ]
+  ],
+  "font_sha256": "3769f0f76477a7d9e2e6cb40422dedacb56c9ab1a6f7beee89b2b9ba6b8091ee",
+  "banner_sha256": "73a63c7a6583c435b9ba6338859b2f6ad2b617b8b11dbb5044488403b84d8027",
+  "output_dir": "C:\\Users\\rccol\\AppData\\Local\\Temp\\legends-banner-renders\\legends-jev",
+  "published": false
+}

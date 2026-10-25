@@ -1,4 +1,8 @@
-# `legends-jev`
+# ![legends-jev](assets/banner.webp)
+
+[![release](https://img.shields.io/github/v/release/avalonreset/legends-jev?label=release&sort=date&style=flat-square&labelColor=000000&color=ff0000)](https://github.com/avalonreset/legends-jev/releases/latest)
+[![checks](https://img.shields.io/github/actions/workflow/status/avalonreset/legends-jev/ci.yml?branch=main&label=checks&style=flat-square&labelColor=000000)](https://github.com/avalonreset/legends-jev/actions/workflows/ci.yml)
+[![license](https://img.shields.io/github/license/avalonreset/legends-jev?label=license&style=flat-square&labelColor=000000&color=666666)](LICENSE)
 
 Typed decision advice, general-purpose optical recognition (`ocr`), and storefront
 signage verification (`signage`) for an operator choosing application, browser,
@@ -17,7 +21,7 @@ operator must check the live target, evidence freshness, scope and permissions.
 
 Part of the [`cto-legends`](https://github.com/avalonreset/cto-legends) ecosystem. Install `cto-legends` once to give your coding agent on-demand discovery, installation, and execution routing across all 17 Legends modules. `cto-legends` is the only registered skill; this repo vendors a byte-exact copy at `skills/cto-legends/SKILL.md`.
 
-## Install and use
+## Quick start: install and use
 
 With [`cto-legends`](https://github.com/avalonreset/cto-legends) installed:
 
@@ -152,3 +156,29 @@ attachable vault. Local evidence belongs in ignored `var/` or a user-selected
 output directory. Public catalog admission follows the independent module
 release and immutable-source verification; local guide registration is distinct
 from a public managed install.
+
+## Architecture and project layout
+
+```text
+Operator / Agent
+  -> Offline preflight & image normalization (280..1568 px per side)
+  -> Explicit preview (`preview`, `decide`, `ocr`, `signage` without `--execute`)
+  -> Single TypeSafe `jev-1.14.0` request (only when `--execute` is passed)
+  -> Validated Choice, Score, Noul, and Box (`pixel_box` mapped to original image)
+```
+
+- `legends_jev/`: Zero-dependency Python 3.10+ package for structured decision, OCR, and signage verification workflows.
+- `legends_jev/docs/recipe.md` and `docs/`: Operator recipe, [upstream notes](docs/UPSTREAM.md), and [search strategy](docs/SEARCH-STRATEGY.md).
+- `skills/cto-legends/SKILL.md`: Pinned copy of the central [`cto-legends`](https://github.com/avalonreset/cto-legends) router skill.
+
+## FAQ
+
+**Does `legends-jev` click buttons or control my desktop directly?**
+No. `legends-jev` returns validated `Choice`, `Score`, `Noul`, and `Box` (`pixel_box`) observations. Desktop and browser actuation remain in [`legends-shell`](https://github.com/avalonreset/legends-shell) or your chosen automation tool.
+
+**What happens if I pass a 1920x1080 screenshot to `legends-jev ocr`?**
+`legends-jev` automatically normalizes out-of-range PNG/JPEG images into TypeSafe's required `280..1568` pixel bounds before sending the request and maps returned `0..1` bounding boxes back to exact `pixel_box` coordinates on your original screenshot.
+
+## License and contributing
+
+MIT licensed. See [LICENSE](LICENSE), [CONTRIBUTING.md](CONTRIBUTING.md), [SUPPORT.md](SUPPORT.md), and [SECURITY.md](SECURITY.md).

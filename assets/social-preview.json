@@ -1,0 +1,40 @@
+{
+  "template": "legends-social-v1",
+  "title": "legends-jev",
+  "subtitle": "optical character recognition, signage verification, and typed computer-use decisions",
+  "size": [
+    1280,
+    640
+  ],
+  "title_px": 64,
+  "subtitle_px": 36,
+  "safe_margin_px": 80,
+  "lines": [
+    "optical character recognition, signage",
+    "verification, and typed computer-use decisions"
+  ],
+  "text_bounds": [
+    [
+      80,
+      176,
+      520,
+      238
+    ],
+    [
+      80,
+      324,
+      916,
+      362
+    ],
+    [
+      80,
+      372,
+      1092,
+      409
+    ]
+  ],
+  "font_sha256": "3769f0f76477a7d9e2e6cb40422dedacb56c9ab1a6f7beee89b2b9ba6b8091ee",
+  "image_sha256": "7544938898d7d451f9655968ec4c8504cb5a0b9e135abb41427467eacf01907e",
+  "bytes": 22073,
+  "upload_status": "not_attempted"
+}
