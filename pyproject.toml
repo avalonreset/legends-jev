@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "legends-jev"
-version = "0.2.0"
+version = "0.2.1"
 description = "Bounded typed decision advice and optical recognition over supplied evidence"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = "MIT"
 license-files = ["LICENSE"]
 dependencies = []

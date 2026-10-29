@@ -16,7 +16,7 @@
     "instructions": ["README.md", "legends_jev/docs/recipe.md"]
   },
   "recipe": {
-    "requires_python": [3, 10],
+    "requires_python": [3, 11],
     "pip": {"kind": "path"},
     "probe": [{"do": "module-cli", "module": "legends_jev", "args": ["doctor"]}],
     "run": {"runtime": "python", "kind": "module", "module": "legends_jev"}

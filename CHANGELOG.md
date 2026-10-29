@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1 - 2026-10-29
+
+- Raise minimum supported Python runtime to Python 3.11 (`requires-python = ">=3.11"`) across package metadata, documentation, and multi-OS CI.
+- Harden `.github/workflows/checks.yml` with 40-character commit SHA action pins, explicit `contents: read` permissions, and `pip>=26.2.2` before package installation.
+
 ## 0.2.0 - 2026-10-21
 
 - Upgrade default pinned model to `jev-1.14.0` (released 2026-10-14).

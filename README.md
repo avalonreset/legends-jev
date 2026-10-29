@@ -37,7 +37,7 @@ cto-legends run legends-jev -- doctor
 The preview commands do not install or call TypeSafe. Use the isolated Python
 reported by manager `status` for the optional Windows DPAPI wrapper.
 
-Python 3.10+; no runtime dependencies. Install this source into an isolated
+Python 3.11+; no runtime dependencies. Install this source into an isolated
 environment, or install the reviewed wheel. Do not register a separate agent
 skill. The byte-exact central `cto-legends` skill is vendored in `skills/`.
 
@@ -167,7 +167,7 @@ Operator / Agent
   -> Validated Choice, Score, Noul, and Box (`pixel_box` mapped to original image)
 ```
 
-- `legends_jev/`: Zero-dependency Python 3.10+ package for structured decision, OCR, and signage verification workflows.
+- `legends_jev/`: Zero-dependency Python 3.11+ package for structured decision, OCR, and signage verification workflows.
 - `legends_jev/docs/recipe.md` and `docs/`: Operator recipe, [upstream notes](docs/UPSTREAM.md), and [search strategy](docs/SEARCH-STRATEGY.md).
 - `skills/cto-legends/SKILL.md`: Pinned copy of the central [`cto-legends`](https://github.com/avalonreset/cto-legends) router skill.
 

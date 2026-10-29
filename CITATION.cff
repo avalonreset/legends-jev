@@ -9,6 +9,6 @@ authors:
 repository-code: "https://github.com/avalonreset/legends-jev"
 url: "https://github.com/avalonreset/cto-legends"
 license: "MIT"
-version: "0.2.0"
+version: "0.2.1"
 date-released: "2026-10-24"
 abstract: "Typed optical recognition (OCR), storefront signage verification, and decision advice for computer use, application control and browser action selection from supplied text evidence, local images, and candidates."
