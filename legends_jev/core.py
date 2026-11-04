@@ -8,8 +8,6 @@ import os
 from pathlib import Path
 import re
 import struct
-import subprocess
-import tempfile
 import time
 import zlib
 
@@ -247,7 +245,7 @@ def _normalize_image_raw(raw, fmt, width, height, plan):
                 out_rows[pad_top + dy] = left_pad_bytes + bytes(mid) + right_pad_bytes
             return "png", _encode_rgb_png(canvas_w, canvas_h, out_rows)
 
-    # 2. Pillow (PIL) path if installed in the environment
+    # 2. Pillow (PIL) path
     try:
         import io
         from PIL import Image  # type: ignore
@@ -265,33 +263,6 @@ def _normalize_image_raw(raw, fmt, width, height, plan):
             return ("jpg" if out_fmt == "JPEG" else "png"), buf.getvalue()
     except ImportError:
         pass
-
-    # 3. Windows .NET System.Drawing fallback for JPEG/PNG when PIL is not installed
-    if os.name == "nt":
-        with tempfile.TemporaryDirectory() as tmp:
-            in_path = Path(tmp) / f"in.{fmt}"
-            out_path = Path(tmp) / "out.jpg"
-            in_path.write_bytes(raw)
-            ps_script = (
-                "Add-Type -AssemblyName System.Drawing; "
-                f"$src = [System.Drawing.Image]::FromFile('{in_path}'); "
-                f"$bmp = New-Object System.Drawing.Bitmap({canvas_w}, {canvas_h}); "
-                "$g = [System.Drawing.Graphics]::FromImage($bmp); "
-                "$g.Clear([System.Drawing.Color]::FromArgb(240, 240, 240)); "
-                "$g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic; "
-                f"$g.DrawImage($src, {pad_left}, {pad_top}, {scaled_w}, {scaled_h}); "
-                "$g.Dispose(); $src.Dispose(); "
-                f"$bmp.Save('{out_path}', [System.Drawing.Imaging.ImageFormat]::Jpeg); "
-                "$bmp.Dispose();"
-            )
-            proc = subprocess.run(
-                ["powershell", "-NoProfile", "-NonInteractive", "-Command", ps_script],
-                capture_output=True,
-                timeout=15,
-                check=False,
-            )
-            if proc.returncode == 0 and out_path.exists():
-                return "jpg", out_path.read_bytes()
 
     raise Invalid(
         f"Image dimensions {width}x{height} are outside {MIN_IMAGE_DIM}..{MAX_IMAGE_DIM} and could not be normalized"

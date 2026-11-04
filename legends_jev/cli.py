@@ -20,7 +20,7 @@ from .core import (
     signage_request,
     validate,
 )
-from .provider import call
+from .provider import call, credential_present
 
 
 def read(path):
@@ -179,6 +179,7 @@ def main(argv=None):
                 "offline_ok": True,
                 "fixture_cases": len(cases),
                 "credential_env_present": bool(os.environ.get("TYPESAFE_API_KEY")),
+                "credential_present": credential_present(),
                 "provider_verified": False,
                 "actuation": False,
                 "visual_grounding": True,
@@ -228,7 +229,7 @@ def main(argv=None):
             envelope = read(args.input)
             reason = preflight(envelope)
             if args.command == "readiness":
-                result = {"input_ready": reason is None, "reason": reason, "credential_env_present": bool(os.environ.get("TYPESAFE_API_KEY")), "provider_verified": False}
+                result = {"input_ready": reason is None, "reason": reason, "credential_env_present": bool(os.environ.get("TYPESAFE_API_KEY")), "credential_present": credential_present(), "provider_verified": False}
             elif args.command == "direct":
                 result = direct(envelope)
             elif args.command == "decide" and args.execute:

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.2 - 2026-11-04
+
+- Add `Pillow>=10.0.0` to package `dependencies` in `pyproject.toml` and remove the Windows `powershell -NoProfile -NonInteractive -Command "Add-Type -AssemblyName System.Drawing..."` image-resizing subprocess fallback from `legends_jev/core.py`, eliminating child PowerShell process creation during JPEG/PNG normalization.
+- Report `credential_present` in `doctor` and `readiness` (`legends_jev/cli.py`) so agents detect provisioned credentials directly without invoking PowerShell wrapper scripts.
+
 ## 0.2.1 - 2026-10-29
 
 - Raise minimum supported Python runtime to Python 3.11 (`requires-python = ">=3.11"`) across package metadata, documentation, and multi-OS CI.

@@ -241,6 +241,15 @@ class CoreTests(unittest.TestCase):
         self.assertEqual((px_crop["left"], px_crop["top"], px_crop["right"], px_crop["bottom"]), (0, 0, 160, 80))
         self.assertEqual((px_crop["center_x"], px_crop["center_y"]), (80, 40))
 
+        # 3. Oversized 1920x1080 JPEG normalizes natively via Pillow without spawning any subprocess
+        from PIL import Image
+        jbuf = io.BytesIO()
+        Image.new("RGB", (1920, 1080), (60, 120, 180)).save(jbuf, format="JPEG", quality=85)
+        entry_jpeg = core.prepare_image_bytes(jbuf.getvalue(), normalize=True)
+        self.assertTrue(entry_jpeg["normalized"])
+        self.assertEqual(entry_jpeg["format"], "jpg")
+        self.assertEqual((entry_jpeg["width"], entry_jpeg["height"]), (1568, 882))
+
     def test_general_purpose_ocr_and_visual_grounding(self):
         entry = core.prepare_image_bytes(valid_rgb_png_bytes(1920, 1080), normalize=True)
         images = {"screen": entry}
