@@ -292,7 +292,10 @@ def prepare_image_bytes(raw, *, normalize=True):
 
 
 def load_image_entry(path, *, normalize=True):
-    raw = Path(path).read_bytes()
+    target = Path(path)
+    if target.is_symlink():
+        raise Invalid("Image path cannot be a symlink")
+    raw = target.read_bytes()
     return prepare_image_bytes(raw, normalize=normalize)
 
 

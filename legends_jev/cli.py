@@ -20,11 +20,14 @@ from .core import (
     signage_request,
     validate,
 )
-from .provider import call, credential_present
+from .provider import call, credential_present, read_api_key_file
 
 
 def read(path):
-    with Path(path).open("rb") as stream:
+    target = Path(path)
+    if target.is_symlink():
+        raise Invalid("Input file cannot be a symlink")
+    with target.open("rb") as stream:
         raw = stream.read(16001)
     if len(raw) > 16000:
         raise Invalid("Input file exceeds 16KB")
@@ -99,16 +102,16 @@ def _preview_vision_payload(payload, images):
     }
 
 
-def benchmark(execute=False):
+def benchmark(execute=False, *, transport=call):
     rows = []
     for case in fixture_cases():
         envelope = materialize(case)
         baseline = direct(envelope)
         row = {"id": case["id"], "expected": case["expected"], "direct": baseline}
         if execute:
-            row["jev"] = decide(envelope, call)
+            row["jev"] = decide(envelope, transport)
         rows.append(row)
-        if execute and row["jev"]["reason"].startswith(("provider_", "credential_", "Unexpected", "Invalid", "Response", "Inconsistent")):
+        if execute and row["jev"]["reason"].startswith(("provider_", "credential_", "api_key_", "Unexpected", "Invalid", "Response", "Inconsistent")):
             break
     summary = {}
     for route in ("direct", "jev") if execute else ("direct",):
@@ -128,14 +131,17 @@ def benchmark(execute=False):
 def main(argv=None):
     parser = argparse.ArgumentParser(description="legends-jev: typed advice and optical recognition over supplied evidence")
     parser.add_argument("--version", action="version", version=__version__)
+    parser.add_argument("--api-key-file", dest="top_api_key_file", help="Explicit file path containing TYPESAFE_API_KEY (refuses symlinks)")
     sub = parser.add_subparsers(dest="command", required=True)
-    sub.add_parser("doctor")
+    doc = sub.add_parser("doctor")
+    doc.add_argument("--api-key-file", help="Explicit file path containing TYPESAFE_API_KEY (refuses symlinks)")
     sub.add_parser("guide")
     sub.add_parser("sample")
     for name in ("preview", "decide", "direct", "readiness"):
         p = sub.add_parser(name)
         p.add_argument("--input", required=True)
         p.add_argument("--output")
+        p.add_argument("--api-key-file", help="Explicit file path containing TYPESAFE_API_KEY (refuses symlinks)")
         if name == "decide":
             p.add_argument("--execute", action="store_true")
 
@@ -146,6 +152,7 @@ def main(argv=None):
     ocr.add_argument("--locate", action="append", dest="locate_targets", help="Visual or text target to localize with a bounding box (repeatable, 1..4)")
     ocr.add_argument("--choice", action="append", dest="choices", help="key=description classification option (repeatable, 1..8)")
     ocr.add_argument("--no-normalize", action="store_true", help="Reject images outside 280..1568px instead of auto-normalizing")
+    ocr.add_argument("--api-key-file", help="Explicit file path containing TYPESAFE_API_KEY (refuses symlinks)")
     ocr.add_argument("--execute", action="store_true")
     ocr.add_argument("--output")
 
@@ -154,17 +161,27 @@ def main(argv=None):
     sig.add_argument("--suspect-term", action="append", dest="suspect_terms", required=True)
     sig.add_argument("--image", action="append", dest="images", required=True, help="label=path to PNG/JPEG (auto-normalized to 280..1568px)")
     sig.add_argument("--no-normalize", action="store_true", help="Reject images outside 280..1568px instead of auto-normalizing")
+    sig.add_argument("--api-key-file", help="Explicit file path containing TYPESAFE_API_KEY (refuses symlinks)")
     sig.add_argument("--execute", action="store_true")
     sig.add_argument("--output")
 
     for name in ("models", "benchmark"):
         p = sub.add_parser(name)
+        p.add_argument("--api-key-file", help="Explicit file path containing TYPESAFE_API_KEY (refuses symlinks)")
         p.add_argument("--execute", action="store_true")
         p.add_argument("--output")
     args = parser.parse_args(argv)
     try:
-        if getattr(args, "output", None) and Path(args.output).exists():
-            raise Invalid("Output exists; choose a new receipt")
+        api_key_file = getattr(args, "api_key_file", None) or getattr(args, "top_api_key_file", None)
+        if api_key_file is not None:
+            read_api_key_file(api_key_file)
+        transport = (lambda payload=None: call(payload, api_key_file=api_key_file)) if api_key_file is not None else call
+        if getattr(args, "output", None):
+            out_path = Path(args.output)
+            if out_path.is_symlink():
+                raise Invalid("Output path cannot be a symlink")
+            if out_path.exists():
+                raise Invalid("Output exists; choose a new receipt")
         if args.command == "guide":
             print(resources.files("legends_jev").joinpath("docs/recipe.md").read_text(encoding="utf-8"))
             return 0
@@ -178,8 +195,8 @@ def main(argv=None):
                 "model": MODEL,
                 "offline_ok": True,
                 "fixture_cases": len(cases),
-                "credential_env_present": bool(os.environ.get("TYPESAFE_API_KEY")),
-                "credential_present": credential_present(),
+                "credential_env_present": bool((os.environ.get("TYPESAFE_API_KEY") or "").strip()),
+                "credential_present": credential_present(api_key_file),
                 "provider_verified": False,
                 "actuation": False,
                 "visual_grounding": True,
@@ -195,7 +212,7 @@ def main(argv=None):
                 result = inspect_ocr(
                     args.goal,
                     images,
-                    call,
+                    transport,
                     expect_texts=args.expect_texts,
                     locate_targets=args.locate_targets,
                     choices=choices,
@@ -212,7 +229,7 @@ def main(argv=None):
         elif args.command == "signage":
             images = _parse_images_arg(args.images, normalize=not args.no_normalize)
             if args.execute:
-                result = inspect_signage(args.title, args.suspect_terms, images, call)
+                result = inspect_signage(args.title, args.suspect_terms, images, transport)
             else:
                 payload = signage_request(args.title, args.suspect_terms, images)
                 result = _preview_vision_payload(payload, images)
@@ -220,20 +237,26 @@ def main(argv=None):
             if not args.execute:
                 result = {"preview": True, "endpoint": "GET /v1/models", "provider_called": False}
             else:
-                raw = call()
+                raw = transport()
                 # Model listing contains only provider model metadata.
                 result = {"provider_called": True, "models": raw}
         elif args.command == "benchmark":
-            result = benchmark(args.execute)
+            result = benchmark(args.execute, transport=transport)
         else:
             envelope = read(args.input)
             reason = preflight(envelope)
             if args.command == "readiness":
-                result = {"input_ready": reason is None, "reason": reason, "credential_env_present": bool(os.environ.get("TYPESAFE_API_KEY")), "credential_present": credential_present(), "provider_verified": False}
+                result = {
+                    "input_ready": reason is None,
+                    "reason": reason,
+                    "credential_env_present": bool((os.environ.get("TYPESAFE_API_KEY") or "").strip()),
+                    "credential_present": credential_present(api_key_file),
+                    "provider_verified": False,
+                }
             elif args.command == "direct":
                 result = direct(envelope)
             elif args.command == "decide" and args.execute:
-                result = decide(envelope, call)
+                result = decide(envelope, transport)
             else:
                 payload = request(envelope)
                 result = {"preview": True, "provider_called": False, "preflight_reason": reason, "request": payload}

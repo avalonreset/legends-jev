@@ -1,7 +1,7 @@
 # ![legends-jev](assets/banner.webp)
 
 [![release](https://img.shields.io/github/v/release/avalonreset/legends-jev?label=release&sort=date&style=flat-square&labelColor=000000&color=ff0000)](https://github.com/avalonreset/legends-jev/releases/latest)
-[![checks](https://img.shields.io/github/actions/workflow/status/avalonreset/legends-jev/ci.yml?branch=main&label=checks&style=flat-square&labelColor=000000)](https://github.com/avalonreset/legends-jev/actions/workflows/ci.yml)
+[![checks](https://img.shields.io/github/actions/workflow/status/avalonreset/legends-jev/checks.yml?branch=main&label=checks&style=flat-square&labelColor=000000)](https://github.com/avalonreset/legends-jev/actions/workflows/checks.yml)
 [![license](https://img.shields.io/github/license/avalonreset/legends-jev?label=license&style=flat-square&labelColor=000000&color=666666)](LICENSE)
 
 Typed decision advice, general-purpose optical recognition (`ocr`), and storefront
@@ -14,12 +14,13 @@ to get validated Choice, Score, Noul, and Box answers (including original-image
 Jev (`jev-1.14.0`) is a hosted TypeSafe System One model. This MIT-licensed adapter
 is open source; the hosted model is not distributed here. No screen capture,
 desktop connection, browser navigation or action execution is provided.
-Existing `legends-shell-kit` and `legends-chrome-kit` retain actuation. The
-operator must check the live target, evidence freshness, scope and permissions.
+The operator must check the live target, evidence freshness, scope and permissions.
 
 ## Agent setup (via `cto-legends`)
 
-Part of the [`cto-legends`](https://github.com/avalonreset/cto-legends) ecosystem. Install `cto-legends` once to give your coding agent on-demand discovery, installation, and execution routing across all 17 Legends modules. `cto-legends` is the only registered skill; this repo vendors a byte-exact copy at `skills/cto-legends/SKILL.md`.
+Part of the [CTO Legends](https://github.com/avalonreset/cto-legends) ecosystem. `cto-legends` is the only registered skill; this repo vendors a pinned copy at `skills/cto-legends/SKILL.md`.
+
+Install with `cto-legends install legends-jev`, then follow the module recipe the router loads. Do not register this module as its own skill.
 
 ## Quick start: install and use
 
@@ -34,12 +35,12 @@ cto-legends handoff legends-jev
 cto-legends run legends-jev -- doctor
 ```
 
-The preview commands do not install or call TypeSafe. Use the isolated Python
-reported by manager `status` for the optional Windows DPAPI wrapper.
+The preview commands do not install or call TypeSafe.
 
-Python 3.11+; no runtime dependencies. Install this source into an isolated
-environment, or install the reviewed wheel. Do not register a separate agent
-skill. The byte-exact central `cto-legends` skill is vendored in `skills/`.
+Python 3.11+ with `Pillow>=10.0.0` for local image normalization and bounding-box geometry.
+Install this source into an isolated environment, or install the reviewed wheel.
+Do not register a separate agent skill. The byte-exact central `cto-legends`
+skill is vendored in `skills/`.
 
 ```sh
 python -m venv .venv
@@ -97,12 +98,9 @@ reasoning.
 
 ## Credentials and data
 
-Provision `TYPESAFE_API_KEY` through your shell's secret manager/environment.
-Do not put values in commands, source, `.env` commits, logs or prompts. On
-Windows `scripts/Invoke-Jev.ps1 -Python <isolated-python> <args>` reuses the
-existing user's DPAPI pilot credential only for `--execute`; it restores the
-previous environment and clears unmanaged plaintext memory afterward. No
-credential is copied or rotated. Other machines must provision their own env.
+Provision `TYPESAFE_API_KEY` through your shell's secret manager/environment, or
+pass an explicit `--api-key-file <path>` (symlinks refused). Do not put secret
+values in commands, source, `.env` commits, logs or prompts.
 
 Only reviewed synthetic, public or nonsecret app metadata is in scope. Free text
 and screenshots are not secret detectors: redact before submitting. The module
@@ -142,13 +140,15 @@ back to exact original-image pixel coordinates (`pixel_box` with `left`, `top`,
 credentials, network errors, unknowns and conservative uncertainty gates return
 operator fallback. Thresholds are pilot review triggers, not calibrated safety
 guarantees. No result authorizes an action. See [operator recipe](legends_jev/docs/recipe.md),
-[upstream findings](docs/UPSTREAM.md), and [release plan](release/RELEASE.md).
+[agent recipe](docs/AGENT-RECIPE.md), and [upstream findings](docs/UPSTREAM.md).
 
 ## Development
 
 ```sh
+python scripts/check_release.py
 python -m unittest discover -s tests -v
 python -m build
+python scripts/check_wheel.py
 ```
 
 The distribution contains plain recipes and synthetic fixtures, not an
@@ -167,8 +167,8 @@ Operator / Agent
   -> Validated Choice, Score, Noul, and Box (`pixel_box` mapped to original image)
 ```
 
-- `legends_jev/`: Zero-dependency Python 3.11+ package for structured decision, OCR, and signage verification workflows.
-- `legends_jev/docs/recipe.md` and `docs/`: Operator recipe, [upstream notes](docs/UPSTREAM.md), and [search strategy](docs/SEARCH-STRATEGY.md).
+- `legends_jev/`: Python 3.11+ with `Pillow>=10.0.0` for local image normalization and bounding-box geometry across structured decision, OCR, and signage verification workflows.
+- `legends_jev/docs/recipe.md` and `docs/`: Operator recipe, [agent recipe](docs/AGENT-RECIPE.md), [upstream notes](docs/UPSTREAM.md), and [search strategy](docs/SEARCH-STRATEGY.md).
 - `skills/cto-legends/SKILL.md`: Pinned copy of the central [`cto-legends`](https://github.com/avalonreset/cto-legends) router skill.
 
 ## FAQ
@@ -181,7 +181,7 @@ No. `legends-jev` returns validated `Choice`, `Score`, `Noul`, and `Box` (`pixel
 
 ## License and contributing
 
-MIT licensed. See [LICENSE](LICENSE), [CONTRIBUTING.md](CONTRIBUTING.md), [SUPPORT.md](SUPPORT.md), and [SECURITY.md](SECURITY.md).
+MIT licensed. See [LICENSE](LICENSE), [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), [CONTRIBUTING.md](CONTRIBUTING.md), [SUPPORT.md](SUPPORT.md), and [SECURITY.md](SECURITY.md).
 
 ---
 

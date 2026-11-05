@@ -1,0 +1,31 @@
+{
+  "product": "legends-jev",
+  "banner_template": "legends-type-v1",
+  "social_template": "legends-social-v1",
+  "subtitle": "optical character recognition, signage checks, and typed computer-use decision advice",
+  "font": "Legends Regular",
+  "font_sha256": "3769f0f76477a7d9e2e6cb40422dedacb56c9ab1a6f7beee89b2b9ba6b8091ee",
+  "font_redistributed": false,
+  "files": [
+    {
+      "name": "banner.png",
+      "bytes": 66750,
+      "sha256": "df6b7176179daadf15fd05b738a42d483b119a038fa76e63d5813ce347a50acd"
+    },
+    {
+      "name": "banner.webp",
+      "bytes": 26676,
+      "sha256": "73a63c7a6583c435b9ba6338859b2f6ad2b617b8b11dbb5044488403b84d8027"
+    },
+    {
+      "name": "preview.png",
+      "bytes": 23705,
+      "sha256": "4dbd0ae21df3883d09700556e4c84c259762f26c5b99603d4732c970692cd934"
+    },
+    {
+      "name": "social-preview.png",
+      "bytes": 22073,
+      "sha256": "7544938898d7d451f9655968ec4c8504cb5a0b9e135abb41427467eacf01907e"
+    }
+  ]
+}

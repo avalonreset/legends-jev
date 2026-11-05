@@ -1,9 +1,15 @@
 # Changelog
 
+## 0.2.3 - 2026-11-05
+
+- Eliminate Windows Defender / EDR Law 1 and Law 3 triggers: remove the legacy Windows DPAPI credential helper (`_windows_dpapi_key`) from `legends_jev/provider.py` and remove the legacy PowerShell credential wrapper script. Read `TYPESAFE_API_KEY` strictly from the environment or an explicit `--api-key-file <path>` with `is_symlink()` refusal.
+- Remove duplicate `VERSION` and candidate release directory so `pyproject.toml` (`0.2.3`) is the single authoritative version source matching `legends_jev/__init__.py` and `CHANGELOG.md`.
+- Add `docs/AGENT-RECIPE.md`, `THIRD_PARTY_NOTICES.md`, `assets/manifest.json`, and `scripts/check_release.py` Gold Standard offline release verification gate, and fix the `README.md` checks badge URL (`actions/workflows/checks.yml`) and dependency description (`Python 3.11+ with Pillow>=10.0.0 for local image normalization and bounding-box geometry`).
+
 ## 0.2.2 - 2026-11-04
 
-- Add `Pillow>=10.0.0` to package `dependencies` in `pyproject.toml` and remove the Windows `powershell -NoProfile -NonInteractive -Command "Add-Type -AssemblyName System.Drawing..."` image-resizing subprocess fallback from `legends_jev/core.py`, eliminating child PowerShell process creation during JPEG/PNG normalization.
-- Report `credential_present` in `doctor` and `readiness` (`legends_jev/cli.py`) so agents detect provisioned credentials directly without invoking PowerShell wrapper scripts.
+- Add `Pillow>=10.0.0` to package `dependencies` in `pyproject.toml` and remove the Windows PowerShell `System.Drawing` image-resizing subprocess fallback from `legends_jev/core.py`, eliminating child PowerShell process creation during JPEG/PNG normalization.
+- Report `credential_present` in `doctor` and `readiness` (`legends_jev/cli.py`) so agents detect provisioned credentials directly without invoking wrapper scripts.
 
 ## 0.2.1 - 2026-10-29
 
@@ -16,12 +22,12 @@
 - Add general-purpose `ocr` CLI subcommand and Python API (`ocr_request`, `inspect_ocr`) for optical text verification (`--expect-text`), visual target localization (`--locate`), readability scoring, and state classification (`--choice`) returning `legends-jev/ocr-receipt-v1`.
 - Add automatic image dimension normalization (`prepare_image_bytes`, `load_image_entry`) to scale/pad out-of-range screenshots (such as `1920x1080` desktops or small crops) into TypeSafe's required `280..1568` px range and map returned `box` coordinates back to exact original-image pixel coordinates (`pixel_box` with `left`, `top`, `right`, `bottom`, `center_x`, `center_y`).
 - Add `signage` CLI subcommand and `inspect_signage` Python helper for bounded storefront, Street View, and logo verification (`legends-jev/signage-receipt-v1`).
-- Support optional optical grounding (`evidence.images` / `kind: "optical-image"`) in `decide` envelopes while preserving 100% compatibility with existing text-only `legends-jev/evidence-v1` workflows, offline preview defaults, DPAPI wrapper, and operator fallback guarantees.
+- Support optional optical grounding (`evidence.images` / `kind: "optical-image"`) in `decide` envelopes while preserving 100% compatibility with existing text-only `legends-jev/evidence-v1` workflows, offline preview defaults, and operator fallback guarantees.
 
 ## 0.1.0 - 2026-09-30
 
 - Bounded typed action advice from supplied text evidence.
 - Deterministic eligibility/freshness guards and explicit operator fallback.
-- Safe environment provisioning and optional Windows DPAPI wrapper.
+- Safe environment provisioning.
 - Offline doctor, preview, direct baseline, labeled synthetic benchmark.
-- Central router recipe, local-guide discovery and public catalog release plan.
+- Central router recipe and local-guide discovery.

@@ -25,21 +25,21 @@ captures screens or executes actions.
      `center_x`, `center_y`)
    - `--choice "key=description"` (1..8 classifications plus automatic `unknown`)
    Out-of-bounds images (such as `1920x1080` desktop screenshots or small button
-   crops) are automatically normalized into TypeSafe's `280..1568` px range and
-   mapped back to original pixel coordinates.
+   crops) are automatically normalized in-process via pure Python and `Pillow`
+   into TypeSafe's `280..1568` px range and mapped back to original pixel coordinates.
 4. For storefront and logo verification against a Google Business Profile title
    (used by `legends-geogrid`), run `signage --title ... --suspect-term ... --image label=path`.
 5. Run without `--execute` first to preview the structured request offline.
-   Provision `TYPESAFE_API_KEY` safely or use the supplied Windows DPAPI wrapper
-   (`scripts/Invoke-Jev.ps1 -Python <isolated-python> ...`). An existing
-   authorized task may cover explicit execution; do not add a redundant prompt.
+   Provision `TYPESAFE_API_KEY` via the environment or pass an explicit
+   `--api-key-file <path>` (symlinks refused). An existing authorized task may
+   cover explicit execution; do not add a redundant prompt.
 6. Passing `--execute` performs at most one call. Inspect `status`, `reason`,
    typed answers, `pixel_box` coordinates, and `latency_ms`. Missing keys,
    provider failure, stale evidence and uncertain answers return `operator_fallback`.
    Stop a failed batch; do not retry blindly or invent a provider decision.
 7. Validate suggestions against current evidence and permissions, especially if
-   the UI changed. Reobserve after actuation. Use `legends-shell-kit` for native
-   controls or `legends-chrome-kit` for browser actions. Jev never actuates.
+   the UI changed. Reobserve after actuation using your authorized desktop or
+   browser automation tool. Jev never actuates.
 
 All suggestions require operator review even with high confidence. Default
 thresholds are conservative pilot settings, not calibrated safety guarantees.
@@ -59,3 +59,9 @@ No account-wide budget enforcement is claimed.
   (`supports_full_title`, `omits_suspect_terms`, `obstructed_or_no_sign`),
   `best_image`, `sign_visible`, `suspect_terms_shown`, `sign_box`, and
   `sign_pixel_box`.
+
+## EDR and Security Guardrails
+
+- Never spawn hidden consoles, execution-policy bypass shell wrappers, or background localhost daemons.
+- Never read local browser profile databases, DPAPI stores, or third-party credential files; read `TYPESAFE_API_KEY` strictly from the environment or an explicit `--api-key-file <path>`.
+- Never print raw secret values to stdout, logs, or Markdown receipts.

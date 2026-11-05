@@ -130,6 +130,35 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(result["reason"], "credential_not_provisioned")
         self.assertFalse(result["provider_called"])
 
+    def test_api_key_file_and_symlink_refusal(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            key_file = Path(tmp) / "typesafe.key"
+            key_file.write_text("ts-file-secret\n", encoding="utf-8")
+            with patch.dict(os.environ, {}, clear=True):
+                self.assertFalse(provider.credential_present())
+                self.assertTrue(provider.credential_present(key_file))
+                self.assertEqual(provider.resolve_api_key(key_file), "ts-file-secret")
+                buf = io.StringIO()
+                with patch("sys.stdout", buf):
+                    rc = main(["doctor", "--api-key-file", str(key_file)])
+                self.assertEqual(rc, 0)
+                doc = json.loads(buf.getvalue())
+                self.assertFalse(doc["credential_env_present"])
+                self.assertTrue(doc["credential_present"])
+            link_file = Path(tmp) / "symlink.key"
+            try:
+                link_file.symlink_to(key_file)
+            except OSError:
+                return
+            with self.assertRaises(RuntimeError) as ctx:
+                provider.read_api_key_file(link_file)
+            self.assertEqual(str(ctx.exception), "api_key_file_symlink_refused")
+            buf_err = io.StringIO()
+            with patch("sys.stdout", buf_err):
+                rc_err = main(["doctor", "--api-key-file", str(link_file)])
+            self.assertEqual(rc_err, 1)
+            self.assertEqual(json.loads(buf_err.getvalue())["error"], "api_key_file_symlink_refused")
+
     def test_http_errors_sanitized(self):
         for status in (301, 401, 429, 500, 529):
             with patch.object(provider.urllib.request, "build_opener") as opener, patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-secret"}):

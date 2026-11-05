@@ -1,6 +1,4 @@
 """One explicit HTTPS request, no redirects/retries, sanitized errors only."""
-import ctypes
-import ctypes.wintypes
 import json
 import os
 from pathlib import Path
@@ -9,6 +7,7 @@ import urllib.request
 from .core import encoded
 
 API = "https://api.typesafe.ai/v1/"
+_MACOS_SYSTEM_SYMLINKS = {Path("/var"), Path("/tmp"), Path("/etc")}
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -16,39 +15,42 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
-def _windows_dpapi_key():
-    if os.name != "nt":
-        return None
-    local_app = os.environ.get("LOCALAPPDATA")
-    if not local_app:
-        return None
-    dpapi_path = Path(local_app) / "Legends" / "TypeSafe" / "api-key.dpapi"
-    if not dpapi_path.is_file():
-        return None
+def read_api_key_file(path):
+    target = Path(path)
+    if target.is_symlink():
+        raise RuntimeError("api_key_file_symlink_refused")
+    for parent in target.parents:
+        if parent.is_symlink() and parent not in _MACOS_SYSTEM_SYMLINKS:
+            raise RuntimeError("api_key_file_symlink_refused")
+    if not target.is_file():
+        raise RuntimeError("api_key_file_missing")
     try:
-        class DATA_BLOB(ctypes.Structure):
-            _fields_ = [("cbData", ctypes.wintypes.DWORD), ("pbData", ctypes.POINTER(ctypes.c_char))]
-
-        raw_bytes = bytes.fromhex(dpapi_path.read_text(encoding="utf-8").strip())
-        in_buf = ctypes.create_string_buffer(raw_bytes, len(raw_bytes))
-        in_blob = DATA_BLOB(len(raw_bytes), in_buf)
-        out_blob = DATA_BLOB()
-        if not ctypes.windll.crypt32.CryptUnprotectData(
-            ctypes.byref(in_blob), None, None, None, None, 0, ctypes.byref(out_blob)
-        ):
-            return None
-        try:
-            secret = ctypes.string_at(out_blob.pbData, out_blob.cbData).decode("utf-16-le").strip()
-            return secret or None
-        finally:
-            ctypes.memset(out_blob.pbData, 0, out_blob.cbData)
-            ctypes.windll.kernel32.LocalFree(out_blob.pbData)
-    except Exception:
-        return None
+        raw = target.read_bytes()
+    except OSError:
+        raise RuntimeError("api_key_file_unreadable") from None
+    if len(raw) > 4096:
+        raise RuntimeError("api_key_file_too_large")
+    try:
+        key = raw.decode("utf-8").strip()
+    except UnicodeError:
+        raise RuntimeError("api_key_file_invalid") from None
+    if not key or "\n" in key or "\r" in key:
+        raise RuntimeError("api_key_file_invalid")
+    return key
 
 
-def credential_present():
-    return bool(os.environ.get("TYPESAFE_API_KEY") or _windows_dpapi_key())
+def resolve_api_key(api_key_file=None):
+    if api_key_file is not None:
+        return read_api_key_file(api_key_file)
+    key = (os.environ.get("TYPESAFE_API_KEY") or "").strip()
+    return key or None
+
+
+def credential_present(api_key_file=None):
+    try:
+        return bool(resolve_api_key(api_key_file))
+    except RuntimeError:
+        return False
 
 
 def uses_images(payload):
@@ -60,8 +62,8 @@ def uses_images(payload):
     return isinstance(questions, dict) and any(isinstance(q, dict) and q.get("type") == "box" for q in questions.values())
 
 
-def call(payload=None):
-    key = os.environ.get("TYPESAFE_API_KEY") or _windows_dpapi_key()
+def call(payload=None, *, api_key_file=None):
+    key = resolve_api_key(api_key_file)
     if not key:
         raise RuntimeError("credential_not_provisioned")
     data = None if payload is None else encoded(payload)
