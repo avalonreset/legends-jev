@@ -16,6 +16,7 @@ from .core import (
     load_image_entry,
     ocr_request,
     preflight,
+    refuse_symlink_tree,
     request,
     signage_request,
     validate,
@@ -24,9 +25,7 @@ from .provider import call, credential_present, read_api_key_file
 
 
 def read(path):
-    target = Path(path)
-    if target.is_symlink():
-        raise Invalid("Input file cannot be a symlink")
+    target = refuse_symlink_tree(path, Invalid, "Input file cannot be a symlink")
     with target.open("rb") as stream:
         raw = stream.read(16001)
     if len(raw) > 16000:
@@ -141,6 +140,7 @@ def main(argv=None):
         p = sub.add_parser(name)
         p.add_argument("--input", required=True)
         p.add_argument("--output")
+        p.add_argument("--overwrite", action="store_true", help="Overwrite existing --output file if present")
         p.add_argument("--api-key-file", help="Explicit file path containing TYPESAFE_API_KEY (refuses symlinks)")
         if name == "decide":
             p.add_argument("--execute", action="store_true")
@@ -155,6 +155,7 @@ def main(argv=None):
     ocr.add_argument("--api-key-file", help="Explicit file path containing TYPESAFE_API_KEY (refuses symlinks)")
     ocr.add_argument("--execute", action="store_true")
     ocr.add_argument("--output")
+    ocr.add_argument("--overwrite", action="store_true", help="Overwrite existing --output file if present")
 
     sig = sub.add_parser("signage", help="Optical verification of storefront signage and logos against a GBP title")
     sig.add_argument("--title", required=True)
@@ -164,24 +165,27 @@ def main(argv=None):
     sig.add_argument("--api-key-file", help="Explicit file path containing TYPESAFE_API_KEY (refuses symlinks)")
     sig.add_argument("--execute", action="store_true")
     sig.add_argument("--output")
+    sig.add_argument("--overwrite", action="store_true", help="Overwrite existing --output file if present")
 
     for name in ("models", "benchmark"):
         p = sub.add_parser(name)
         p.add_argument("--api-key-file", help="Explicit file path containing TYPESAFE_API_KEY (refuses symlinks)")
         p.add_argument("--execute", action="store_true")
         p.add_argument("--output")
+        p.add_argument("--overwrite", action="store_true", help="Overwrite existing --output file if present")
     args = parser.parse_args(argv)
     try:
         api_key_file = getattr(args, "api_key_file", None) or getattr(args, "top_api_key_file", None)
         if api_key_file is not None:
             read_api_key_file(api_key_file)
         transport = (lambda payload=None: call(payload, api_key_file=api_key_file)) if api_key_file is not None else call
+        overwrite = bool(getattr(args, "overwrite", False))
         if getattr(args, "output", None):
-            out_path = Path(args.output)
-            if out_path.is_symlink():
-                raise Invalid("Output path cannot be a symlink")
-            if out_path.exists():
-                raise Invalid("Output exists; choose a new receipt")
+            out_path = refuse_symlink_tree(args.output, Invalid, "Output path cannot be a symlink")
+            if out_path.is_dir():
+                raise Invalid("Output path cannot be a directory")
+            if out_path.exists() and not overwrite:
+                raise Invalid("Output exists; choose a new receipt or pass --overwrite")
         if args.command == "guide":
             print(resources.files("legends_jev").joinpath("docs/recipe.md").read_text(encoding="utf-8"))
             return 0
@@ -262,7 +266,9 @@ def main(argv=None):
                 result = {"preview": True, "provider_called": False, "preflight_reason": reason, "request": payload}
         serialized = json.dumps(result, indent=2, allow_nan=False)
         if getattr(args, "output", None):
-            with Path(args.output).open("x", encoding="utf-8") as stream:
+            out_target = refuse_symlink_tree(args.output, Invalid, "Output path cannot be a symlink")
+            open_mode = "w" if overwrite else "x"
+            with out_target.open(open_mode, encoding="utf-8") as stream:
                 stream.write(serialized + "\n")
             print(json.dumps({"receipt": str(args.output), "written": True}))
         else:

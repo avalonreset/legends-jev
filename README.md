@@ -61,7 +61,7 @@ python -m legends_jev decide --input evidence.json --execute --output receipt.js
 ```
 
 For general-purpose OCR text verification, visual target localization (`box` +
-`pixel_box`), and visual state classification over 1 to 4 PNG/JPEG images:
+`pixel_box`), and visual state classification over 1 to 6 PNG/JPEG images:
 
 ```sh
 python -m legends_jev ocr \
@@ -115,7 +115,7 @@ retention/ZDR entitlement is not established.
 Routinely consider this helper when computer use, application control, browser
 work, document checks, or local SEO audits need a fast (~150-250ms) structured
 choice, optical text check, or bounding-box coordinate lookup over short supplied
-evidence or 1 to 4 images. Prefer ordinary code for exact string matches. Prefer
+evidence or 1 to 6 images. Prefer ordinary code for exact string matches. Prefer
 the reasoning operator when a one-off choice already has enough context, or the
 evidence is ambiguous. Consideration does not mean every click needs a network call.
 
@@ -174,7 +174,7 @@ Operator / Agent
 ## FAQ
 
 **Does `legends-jev` click buttons or control my desktop directly?**
-No. `legends-jev` returns validated `Choice`, `Score`, `Noul`, and `Box` (`pixel_box`) observations. Desktop and browser actuation remain in [`legends-shell`](https://github.com/avalonreset/legends-shell) or your chosen automation tool.
+No. `legends-jev` returns validated `Choice`, `Score`, `Noul`, and `Box` (`pixel_box`) observations. Desktop and browser actuation remain in your chosen desktop or browser automation tool.
 
 **What happens if I pass a 1920x1080 screenshot to `legends-jev ocr`?**
 `legends-jev` automatically normalizes out-of-range PNG/JPEG images into TypeSafe's required `280..1568` pixel bounds before sending the request and maps returned `0..1` bounding boxes back to exact `pixel_box` coordinates on your original screenshot.

@@ -17,7 +17,7 @@ captures screens or executes actions.
    `decide`, supply goal, capture time, candidate IDs/descriptions/routes and
    operator-verified eligibility (`sample` shows the envelope shape; optional
    `evidence.images` adds optical `target_box` and `target_pixel_box` grounding).
-3. For general-purpose OCR and visual grounding on 1 to 4 PNG/JPEG images, use
+3. For general-purpose OCR and visual grounding on 1 to 6 PNG/JPEG images, use
    `ocr --goal ... --image label=path` with any combination of:
    - `--expect-text "<string>"` (1..12 expected text strings verified via `noul`)
    - `--locate "[label:]<target>"` (1..4 targets localized via `noul` + `box`,

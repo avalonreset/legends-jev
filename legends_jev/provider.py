@@ -1,13 +1,15 @@
 """One explicit HTTPS request, no redirects/retries, sanitized errors only."""
+import http.client
 import json
 import os
 from pathlib import Path
+import re
 import urllib.error
 import urllib.request
-from .core import encoded
+from .core import encoded, refuse_symlink_tree
 
 API = "https://api.typesafe.ai/v1/"
-_MACOS_SYSTEM_SYMLINKS = {Path("/var"), Path("/tmp"), Path("/etc")}
+_API_KEY_RE = re.compile(r"^[\x21-\x7e]{1,512}$")
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -16,12 +18,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 
 def read_api_key_file(path):
-    target = Path(path)
-    if target.is_symlink():
-        raise RuntimeError("api_key_file_symlink_refused")
-    for parent in target.parents:
-        if parent.is_symlink() and parent not in _MACOS_SYSTEM_SYMLINKS:
-            raise RuntimeError("api_key_file_symlink_refused")
+    target = refuse_symlink_tree(path, RuntimeError, "api_key_file_symlink_refused")
     if not target.is_file():
         raise RuntimeError("api_key_file_missing")
     try:
@@ -34,7 +31,7 @@ def read_api_key_file(path):
         key = raw.decode("utf-8").strip()
     except UnicodeError:
         raise RuntimeError("api_key_file_invalid") from None
-    if not key or "\n" in key or "\r" in key:
+    if not key or not _API_KEY_RE.fullmatch(key):
         raise RuntimeError("api_key_file_invalid")
     return key
 
@@ -42,8 +39,13 @@ def read_api_key_file(path):
 def resolve_api_key(api_key_file=None):
     if api_key_file is not None:
         return read_api_key_file(api_key_file)
-    key = (os.environ.get("TYPESAFE_API_KEY") or "").strip()
-    return key or None
+    raw_env = os.environ.get("TYPESAFE_API_KEY")
+    if raw_env is None or not raw_env.strip():
+        return None
+    key = raw_env.strip()
+    if not _API_KEY_RE.fullmatch(key):
+        raise RuntimeError("api_key_invalid")
+    return key
 
 
 def credential_present(api_key_file=None):
@@ -79,7 +81,7 @@ def call(payload=None, *, api_key_file=None):
         return json.loads(body)
     except urllib.error.HTTPError as exc:
         raise RuntimeError("provider_http_" + str(exc.code)) from None
-    except (urllib.error.URLError, TimeoutError, OSError):
+    except (urllib.error.URLError, http.client.HTTPException, TimeoutError, OSError):
         raise RuntimeError("provider_network_or_timeout") from None
     except (ValueError, UnicodeError):
         raise RuntimeError("provider_invalid_json") from None

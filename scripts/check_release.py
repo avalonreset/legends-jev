@@ -23,6 +23,7 @@ REQUIRED = [
     "CONTRIBUTING.md",
     "CODE_OF_CONDUCT.md",
     "CHANGELOG.md",
+    "CITATION.cff",
     "docs/AGENT-RECIPE.md",
     "docs/BENCHMARK.md",
     "docs/SEARCH-STRATEGY.md",
@@ -30,7 +31,12 @@ REQUIRED = [
     "legends_jev/docs/recipe.md",
     "skills/cto-legends/SKILL.md",
     ".legends-module",
+    ".legends-router-pin",
     "assets/manifest.json",
+    "assets/banner.png",
+    "assets/banner.webp",
+    "assets/preview.png",
+    "assets/social-preview.png",
 ]
 TEXT_SUFFIXES = {".md", ".py", ".json", ".toml", ".yml", ".in", ".txt", ".cfg", ".ini", ".cff"}
 FORBIDDEN = [

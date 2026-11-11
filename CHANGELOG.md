@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.4 - 2026-11-11
+
+- Harden image loading and decompression against CWE-409 / CWE-400 bombs: bound initial file reads before allocation, enforce `MAX_IMAGE_DIMENSION = 16384` and `MAX_IMAGE_PIXELS = 25000000` in `parse_image_header()`, bound `zlib.decompressobj().decompress(..., expected + 1)` in `_decode_simple_png_rgb()`, and catch Pillow decompression-bomb and parse exceptions as sanitized `Invalid` errors.
+- Prevent `TYPESAFE_API_KEY` header injection and exception leakage (CWE-209 / CWE-93): validate resolved API keys against printable ASCII (`^[\x21-\x7e]{1,512}$`) and catch `http.client.HTTPException` (`InvalidHeader`, `BadStatusLine`, `IncompleteRead`, `LineTooLong`) in `provider.py`.
+- Enforce ancestor-chain symlink refusal (`refuse_symlink_tree`) across `--input`, `--image`, `--api-key-file`, and `--output`, and add explicit `--overwrite` support for `--output`.
+- Isolate untrusted `--expect-text` and `--locate` values in `ocr_request()` inside `state.expected_texts` and `state.locate_targets` so question instructions remain static strings.
+- Align `docs/AGENT-RECIPE.md`, `README.md`, `legends_jev/docs/recipe.md`, `pyproject.toml` (`license-files`), `CITATION.cff`, and `scripts/check_release.py` (`REQUIRED` list).
+
 ## 0.2.3 - 2026-11-05
 
 - Eliminate Windows Defender / EDR Law 1 and Law 3 triggers: remove the legacy Windows DPAPI credential helper (`_windows_dpapi_key`) from `legends_jev/provider.py` and remove the legacy PowerShell credential wrapper script. Read `TYPESAFE_API_KEY` strictly from the environment or an explicit `--api-key-file <path>` with `is_symlink()` refusal.
