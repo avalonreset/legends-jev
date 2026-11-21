@@ -17,7 +17,7 @@ from .core import (
 )
 from .provider import call
 
-__version__ = "0.2.4"
+__version__ = "0.2.5"
 
 __all__ = [
     "MODEL",

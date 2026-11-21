@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.5 - 2026-11-21
+
+- Add `scripts/render_cards.py` and render 7 outlined Legends Font `r1` architecture, plain-english workflow, comparison, agent handoff, message desk, and star-shrine SVG cards under `assets/cards/r1/`.
+- Rewrite `README.md` with visual architecture cards, explicit `280..1568` px in-process normalization and `pixel_box` coordinate reversal documentation, collapsible reference drawers, and evergreen ecosystem links.
+- Include `assets/cards/r1/*.svg` in `MANIFEST.in` and enforce SVG card presence, XML/dash hygiene, and `CITATION.cff` version parity in `scripts/check_release.py`.
+
 ## 0.2.4 - 2026-11-11
 
 - Harden image loading and decompression against CWE-409 / CWE-400 bombs: bound initial file reads before allocation, enforce `MAX_IMAGE_DIMENSION = 16384` and `MAX_IMAGE_PIXELS = 25000000` in `parse_image_header()`, bound `zlib.decompressobj().decompress(..., expected + 1)` in `_decode_simple_png_rgb()`, and catch Pillow decompression-bomb and parse exceptions as sanitized `Invalid` errors.

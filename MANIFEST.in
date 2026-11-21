@@ -1,5 +1,5 @@
 include LICENSE NOTICE THIRD_PARTY_NOTICES.md README.md CHANGELOG.md AGENTS.md CONTRIBUTING.md SECURITY.md SUPPORT.md CODE_OF_CONDUCT.md CITATION.cff .legends-module .legends-router-pin .gitattributes
-recursive-include assets *.png *.webp *.json
+recursive-include assets *.png *.webp *.json *.svg
 recursive-include docs *.md
 recursive-include skills *.md
 recursive-include scripts *.py

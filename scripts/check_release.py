@@ -37,8 +37,16 @@ REQUIRED = [
     "assets/banner.webp",
     "assets/preview.png",
     "assets/social-preview.png",
+    "assets/cards/r1/slot-1-agent-handoff.svg",
+    "assets/cards/r1/slot-2-three-pillars.svg",
+    "assets/cards/r1/slot-3-plain-english-chains.svg",
+    "assets/cards/r1/slot-4-jev-architecture.svg",
+    "assets/cards/r1/slot-5-adhoc-vs-jev.svg",
+    "assets/cards/r1/slot-7-message-avalon-reset.svg",
+    "assets/cards/r1/slot-collection-star-shrine.svg",
+    "scripts/render_cards.py",
 ]
-TEXT_SUFFIXES = {".md", ".py", ".json", ".toml", ".yml", ".in", ".txt", ".cfg", ".ini", ".cff"}
+TEXT_SUFFIXES = {".md", ".py", ".json", ".toml", ".yml", ".in", ".txt", ".cfg", ".ini", ".cff", ".svg"}
 FORBIDDEN = [
     r"(?i)[a-z]:\\+users\\+",
     r"(?i)\.tail[a-z0-9]+\.ts\.net",
@@ -108,17 +116,20 @@ def _check_version_parity(root: Path, errors: list[str]) -> None:
     pyproject = root / "pyproject.toml"
     init_py = root / "legends_jev" / "__init__.py"
     changelog = root / "CHANGELOG.md"
-    if not (pyproject.is_file() and init_py.is_file() and changelog.is_file()):
+    citation = root / "CITATION.cff"
+    if not (pyproject.is_file() and init_py.is_file() and changelog.is_file() and citation.is_file()):
         return
     m_py = re.search(r'^version\s*=\s*"(\d+\.\d+\.\d+)"', pyproject.read_text(encoding="utf-8-sig"), re.M)
     m_init = re.search(r'^__version__\s*=\s*"(\d+\.\d+\.\d+)"', init_py.read_text(encoding="utf-8-sig"), re.M)
     m_cl = re.search(r"^##\s+\[?v?(\d+\.\d+\.\d+)\b", changelog.read_text(encoding="utf-8-sig"), re.M)
+    m_cit = re.search(r'^version:\s*"(\d+\.\d+\.\d+)"', citation.read_text(encoding="utf-8-sig"), re.M)
     v_py = m_py.group(1) if m_py else None
     v_init = m_init.group(1) if m_init else None
     v_cl = m_cl.group(1) if m_cl else None
-    if len({v_py, v_init, v_cl}) != 1 or v_py is None:
+    v_cit = m_cit.group(1) if m_cit else None
+    if len({v_py, v_init, v_cl, v_cit}) != 1 or v_py is None:
         errors.append(
-            f"Version parity mismatch: pyproject={v_py}, __init__={v_init}, CHANGELOG={v_cl}"
+            f"Version parity mismatch: pyproject={v_py}, __init__={v_init}, CHANGELOG={v_cl}, CITATION={v_cit}"
         )
 
 

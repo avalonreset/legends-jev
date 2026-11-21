@@ -1,11 +1,11 @@
 # Search Positioning Evidence (`legends-jev`)
 
-Collected 2026-10-25 through `legends-dataforseo` v0.1.5 (`keywords_data/google_ads/search_volume/live`).
+Collected 2026-10-25 through `legends-dataforseo` (`keywords_data/google_ads/search_volume/live`).
 United States (`2840`), English (`en`).
 
 ## Anti-Cannibalization Positioning Decision
 
-Within the 17-module [`cto-legends`](https://github.com/avalonreset/cto-legends) ecosystem, `legends-jev` owns its dedicated problem category rather than competing with the master router for generic `agent skills` queries.
+Within the [`cto-legends`](https://github.com/avalonreset/cto-legends) ecosystem, `legends-jev` owns its dedicated problem category rather than competing with the master router for generic `agent skills` queries.
 
 | Keyword | US Monthly Search Volume | CPC | Role in `legends-jev` |
 | :--- | ---: | ---: | :--- |
