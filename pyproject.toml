@@ -13,6 +13,8 @@ license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md"]
 dependencies = ["Pillow>=10.0.0"]
 
 [project.urls]
+Homepage = "https://cto-legends.com/modules/legends-jev"
+Documentation = "https://cto-legends.com/modules/legends-jev"
 Repository = "https://github.com/avalonreset/legends-jev"
 Issues = "https://github.com/avalonreset/legends-jev/issues"
 
